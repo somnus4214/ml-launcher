@@ -9,7 +9,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::Line,
-    widgets::{Block, Borders, Clear, List, ListItem, Paragraph, Tabs},
+    widgets::{Block, Borders, Clear, List, ListItem, Paragraph, Tabs, Wrap},
     Frame, Terminal,
 };
 use std::io;
@@ -25,7 +25,9 @@ pub struct App {
     edit_buffer: String,
     input_mode: InputMode,
     save_path: String,
+    load_path: String,
     show_save_dialog: bool,
+    show_load_dialog: bool,
 }
 
 #[derive(Default, Clone, PartialEq)]
@@ -34,6 +36,7 @@ pub enum InputMode {
     Normal,
     Editing,
     SaveDialog,
+    LoadDialog,
 }
 
 impl App {
@@ -48,7 +51,9 @@ impl App {
             edit_buffer: String::new(),
             input_mode: InputMode::Normal,
             save_path: "config.json".to_string(),
+            load_path: "config.json".to_string(),
             show_save_dialog: false,
+            show_load_dialog: false,
         }
     }
 
@@ -87,6 +92,7 @@ impl App {
             InputMode::Normal => self.handle_normal_key(key),
             InputMode::Editing => self.handle_editing_key(key),
             InputMode::SaveDialog => self.handle_save_dialog_key(key),
+            InputMode::LoadDialog => self.handle_load_dialog_key(key),
         }
     }
 
@@ -117,7 +123,7 @@ impl App {
                         0 => self.generate_command(),
                         1 => self.run_training(),
                         2 => self.show_save_dialog(),
-                        3 => self.load_config(),
+                        3 => self.show_load_dialog(),
                         4 => self.add_param(),
                         5 => self.delete_param(),
                         6 => self.start_editing(),
@@ -127,7 +133,7 @@ impl App {
             }
             KeyCode::Char('g') => self.generate_command(),
             KeyCode::Char('s') => self.show_save_dialog(),
-            KeyCode::Char('l') => self.load_config(),
+            KeyCode::Char('l') => self.show_load_dialog(),
             KeyCode::Char('a') => self.add_param(),
             KeyCode::Char('d') => self.delete_param(),
             KeyCode::Char('e') => self.start_editing(),
@@ -156,6 +162,40 @@ impl App {
             }
             KeyCode::Backspace => {
                 self.edit_buffer.pop();
+            }
+            _ => {}
+        }
+    }
+
+    fn handle_load_dialog_key(&mut self, key: KeyEvent) {
+        match key.code {
+            KeyCode::Enter => {
+                // if let Err(e) = self.config.load(&self.load_path) {
+                //     self.command_output = format!("Error: {}", e);
+                // } else {
+                //     self.command_output = format!("Load from {}", self.load_path);
+                // }
+                match self.config.load(&self.load_path) {
+                    Ok(config) => {
+                        self.config = config;
+                        self.command_output = format!("Load from {}", self.load_path);
+                    }
+                    Err(e) => {
+                        self.command_output = format!("Error: {}", e);
+                    }
+                }
+                self.show_load_dialog = false;
+                self.input_mode = InputMode::Normal;
+            }
+            KeyCode::Esc => {
+                self.show_load_dialog = false;
+                self.input_mode = InputMode::Normal;
+            }
+            KeyCode::Char(c) => {
+                self.load_path.push(c);
+            }
+            KeyCode::Backspace => {
+                self.load_path.pop();
             }
             _ => {}
         }
@@ -195,13 +235,9 @@ impl App {
         self.input_mode = InputMode::SaveDialog;
     }
 
-    fn load_config(&mut self) {
-        if let Ok(config) = TrainConfig::load(&self.save_path) {
-            self.config = config;
-            self.command_output = format!("Loaded config from {}", self.save_path);
-        } else {
-            self.command_output = format!("Failed to load config from {}", self.save_path);
-        }
+    fn show_load_dialog(&mut self) {
+        self.show_load_dialog = true;
+        self.input_mode = InputMode::LoadDialog;
     }
 
     fn add_param(&mut self) {
@@ -269,7 +305,9 @@ impl App {
                 .enumerate()
                 .map(|(i, p)| {
                     let style = if i == self.selected_param {
-                        Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
+                        Style::default()
+                            .fg(Color::Yellow)
+                            .add_modifier(Modifier::BOLD)
                     } else {
                         Style::default()
                     };
@@ -279,11 +317,7 @@ impl App {
                 .collect();
 
             let param_list = List::new(param_items)
-                .block(
-                    Block::default()
-                        .title("Parameters")
-                        .borders(Borders::ALL),
-                )
+                .block(Block::default().title("Parameters").borders(Borders::ALL))
                 .highlight_style(Style::default().fg(Color::Cyan));
             f.render_widget(param_list, main_chunks[0]);
 
@@ -311,7 +345,11 @@ impl App {
             .enumerate()
             .map(|(i, item)| {
                 if i == self.selected_param {
-                    item.style(Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
+                    item.style(
+                        Style::default()
+                            .fg(Color::Green)
+                            .add_modifier(Modifier::BOLD),
+                    )
                 } else {
                     item
                 }
@@ -339,32 +377,39 @@ impl App {
         let help = Paragraph::new(
             "Tab: Switch | ↑↓: Navigate | Enter: Run | g: Generate | s: Save | l: Load | a: Add | d: Delete | e: Edit | q: Quit",
         )
-        .style(Style::default().fg(Color::DarkGray));
+        .style(Style::default().fg(Color::DarkGray)).wrap(Wrap { trim: true });
         f.render_widget(help, chunks[3]);
 
         // Editing popup
         if self.editing {
             let popup_area = centered_rect(60, 20, rect);
             f.render_widget(Clear, popup_area);
-            let popup = Paragraph::new(self.edit_buffer.as_str())
-                .block(
-                    Block::default()
-                        .title("Edit Parameter Value (Enter=save, Esc=cancel)")
-                        .borders(Borders::ALL),
-                );
+            let popup = Paragraph::new(self.edit_buffer.as_str()).block(
+                Block::default()
+                    .title("Edit Parameter Value (Enter=save, Esc=cancel)")
+                    .borders(Borders::ALL),
+            );
             f.render_widget(popup, popup_area);
         }
-
+        if self.show_load_dialog {
+            let popup_area = centered_rect(60, 20, rect);
+            f.render_widget(Clear, popup_area);
+            let popup = Paragraph::new(self.load_path.as_str()).block(
+                Block::default()
+                    .title("Load from file (Enter=load, Esc =cancel)")
+                    .borders(Borders::ALL),
+            );
+            f.render_widget(popup, popup_area);
+        }
         // Save dialog popup
         if self.show_save_dialog {
             let popup_area = centered_rect(60, 20, rect);
             f.render_widget(Clear, popup_area);
-            let popup = Paragraph::new(self.save_path.as_str())
-                .block(
-                    Block::default()
-                        .title("Save to file (Enter=save, Esc=cancel)")
-                        .borders(Borders::ALL),
-                );
+            let popup = Paragraph::new(self.save_path.as_str()).block(
+                Block::default()
+                    .title("Save to file (Enter=save, Esc=cancel)")
+                    .borders(Borders::ALL),
+            );
             f.render_widget(popup, popup_area);
         }
     }

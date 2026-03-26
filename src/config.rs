@@ -66,7 +66,12 @@ impl Default for TrainConfig {
                 ParamField::new("data-dir", "", ParamType::Path, "Data directory"),
                 ParamField::new("checkpoint", "", ParamType::Path, "Checkpoint path"),
                 ParamField::new("gpu", "0", ParamType::Integer, "GPU device ID"),
-                ParamField::new("resume", "false", ParamType::Boolean, "Resume from checkpoint"),
+                ParamField::new(
+                    "resume",
+                    "false",
+                    ParamType::Boolean,
+                    "Resume from checkpoint",
+                ),
             ],
             env_vars: HashMap::new(),
         }
@@ -84,7 +89,7 @@ impl TrainConfig {
         cmd
     }
 
-    pub fn load(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn load(&self, path: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let content = std::fs::read_to_string(path)?;
         let config: TrainConfig = serde_json::from_str(&content)?;
         Ok(config)
