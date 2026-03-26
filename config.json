@@ -1,0 +1,168 @@
+{
+  "script_path": "train.py",
+  "python_path": "python",
+  "params": [
+    {
+      "name": "name",
+      "value": "experiment-001",
+      "param_type": "String",
+      "description": "实验名称",
+      "use_default": false
+    },
+    {
+      "name": "lr",
+      "value": "0.001",
+      "param_type": "Float",
+      "description": "学习率",
+      "use_default": false
+    },
+    {
+      "name": "epochs",
+      "value": "100",
+      "param_type": "Integer",
+      "description": "训练轮数",
+      "use_default": false
+    },
+    {
+      "name": "batch-size",
+      "value": "32",
+      "param_type": "Integer",
+      "description": "批次大小",
+      "use_default": false
+    },
+    {
+      "name": "seed",
+      "value": "42",
+      "param_type": "Integer",
+      "description": "随机种子",
+      "use_default": false
+    },
+    {
+      "name": "model",
+      "value": "resnet18",
+      "param_type": "String",
+      "description": "模型架构",
+      "use_default": false
+    },
+    {
+      "name": "pretrained",
+      "value": "false",
+      "param_type": "Boolean",
+      "description": "使用预训练权重",
+      "use_default": false
+    },
+    {
+      "name": "num-classes",
+      "value": "10",
+      "param_type": "Integer",
+      "description": "分类数量",
+      "use_default": false
+    },
+    {
+      "name": "data-dir",
+      "value": "./data",
+      "param_type": "Path",
+      "description": "数据集目录",
+      "use_default": false
+    },
+    {
+      "name": "output-dir",
+      "value": "./output",
+      "param_type": "Path",
+      "description": "输出目录",
+      "use_default": false
+    },
+    {
+      "name": "num-workers",
+      "value": "4",
+      "param_type": "Integer",
+      "description": "数据加载线程数",
+      "use_default": true
+    },
+    {
+      "name": "optimizer",
+      "value": "adam",
+      "param_type": "String",
+      "description": "优化器类型",
+      "use_default": true
+    },
+    {
+      "name": "weight-decay",
+      "value": "0.0001",
+      "param_type": "Float",
+      "description": "权重衰减",
+      "use_default": true
+    },
+    {
+      "name": "momentum",
+      "value": "0.9",
+      "param_type": "Float",
+      "description": "SGD 动量",
+      "use_default": true
+    },
+    {
+      "name": "scheduler",
+      "value": "cosine",
+      "param_type": "String",
+      "description": "学习率调度器",
+      "use_default": true
+    },
+    {
+      "name": "warmup-epochs",
+      "value": "5",
+      "param_type": "Integer",
+      "description": "预热轮数",
+      "use_default": true
+    },
+    {
+      "name": "amp",
+      "value": "false",
+      "param_type": "Boolean",
+      "description": "使用自动混合精度",
+      "use_default": true
+    },
+    {
+      "name": "gpu",
+      "value": "0",
+      "param_type": "Integer",
+      "description": "GPU 设备ID",
+      "use_default": true
+    },
+    {
+      "name": "distributed",
+      "value": "false",
+      "param_type": "Boolean",
+      "description": "分布式训练",
+      "use_default": true
+    },
+    {
+      "name": "resume",
+      "value": "",
+      "param_type": "String",
+      "description": "恢复训练的检查点路径",
+      "use_default": true
+    },
+    {
+      "name": "save-freq",
+      "value": "10",
+      "param_type": "Integer",
+      "description": "保存检查点的频率(轮)",
+      "use_default": true
+    },
+    {
+      "name": "log-freq",
+      "value": "100",
+      "param_type": "Integer",
+      "description": "日志打印频率(步)",
+      "use_default": true
+    },
+    {
+      "name": "tensorboard",
+      "value": "false",
+      "param_type": "Boolean",
+      "description": "启用 TensorBoard 日志",
+      "use_default": true
+    }
+  ],
+  "env_vars": {}
+}
