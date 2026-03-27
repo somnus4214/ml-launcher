@@ -95,10 +95,7 @@ impl ParamField {
                 param_name: self.name.clone(),
                 expected_type: self.param_type.clone(),
                 invalid_value: self.value.clone(),
-                message: format!(
-                    "值 '{}' 不是有效的 {:?} 类型",
-                    self.value, self.param_type
-                ),
+                message: format!("值 '{}' 不是有效的 {:?} 类型", self.value, self.param_type),
             })
         } else {
             // 对于 Path 类型，额外检查路径是否存在
@@ -204,9 +201,9 @@ impl TrainConfig {
             .params
             .iter()
             .filter_map(|p| {
-                old_params_map.get(p.name.as_str()).map(|old| {
-                    (p.name.clone(), (old.value.clone(), old.use_default))
-                })
+                old_params_map
+                    .get(p.name.as_str())
+                    .map(|old| (p.name.clone(), (old.value.clone(), old.use_default)))
             })
             .collect();
 

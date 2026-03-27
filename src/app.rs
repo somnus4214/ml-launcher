@@ -20,8 +20,8 @@ pub struct App {
     command_output: String,
     running: bool,
     selected_tab: usize,
-    selected_param: usize,      // Parameters tab 选中的参数
-    selected_filter: usize,     // Filter tab 选中的参数
+    selected_param: usize,  // Parameters tab 选中的参数
+    selected_filter: usize, // Filter tab 选中的参数
     editing: bool,
     edit_buffer: String,
     edit_warning: Option<String>, // 编辑时的验证警告
@@ -136,17 +136,20 @@ impl App {
             }
             KeyCode::Up => {
                 match self.selected_tab {
-                    0 => { // Parameters tab - 只显示 use_default=false 的参数
+                    0 => {
+                        // Parameters tab - 只显示 use_default=false 的参数
                         if self.selected_param > 0 {
                             self.selected_param -= 1;
                         }
                     }
-                    1 => { // Filter tab - 显示所有参数
+                    1 => {
+                        // Filter tab - 显示所有参数
                         if self.selected_filter > 0 {
                             self.selected_filter -= 1;
                         }
                     }
-                    _ => { // Actions tab
+                    _ => {
+                        // Actions tab
                         if self.selected_param > 0 {
                             self.selected_param -= 1;
                         }
@@ -155,20 +158,24 @@ impl App {
             }
             KeyCode::Down => {
                 match self.selected_tab {
-                    0 => { // Parameters tab
-                        let active_count = self.config.params.iter().filter(|p| !p.use_default).count();
+                    0 => {
+                        // Parameters tab
+                        let active_count =
+                            self.config.params.iter().filter(|p| !p.use_default).count();
                         let max = active_count.saturating_sub(1);
                         if self.selected_param < max {
                             self.selected_param += 1;
                         }
                     }
-                    1 => { // Filter tab
+                    1 => {
+                        // Filter tab
                         let max = self.config.params.len().saturating_sub(1);
                         if self.selected_filter < max {
                             self.selected_filter += 1;
                         }
                     }
-                    _ => { // Actions tab
+                    _ => {
+                        // Actions tab
                         if self.selected_param < 7 {
                             self.selected_param += 1;
                         }
@@ -176,7 +183,8 @@ impl App {
                 }
             }
             KeyCode::Enter => {
-                if self.selected_tab == 2 { // Actions tab
+                if self.selected_tab == 2 {
+                    // Actions tab
                     match self.selected_param {
                         0 => self.generate_command(),
                         1 => self.run_training(),
@@ -196,7 +204,8 @@ impl App {
             KeyCode::Char('d') => self.delete_param(),
             KeyCode::Char('e') => self.start_editing(),
             KeyCode::Char('t') => {
-                if self.selected_tab == 1 { // 只在 Filter tab 中有效
+                if self.selected_tab == 1 {
+                    // 只在 Filter tab 中有效
                     self.toggle_use_default();
                 }
             }
@@ -451,7 +460,9 @@ impl App {
         let help = match self.selected_tab {
             0 => "Tab: Switch | ↑↓: Nav | e: Edit | d: Del | q: Quit",
             1 => "Tab: Switch | ↑↓: Nav | t: Toggle Default | q: Quit",
-            _ => "Tab: Switch | ↑↓: Nav | Enter: Run | g: Gen | s: Save | l: Load | a: Add | q: Quit",
+            _ => {
+                "Tab: Switch | ↑↓: Nav | Enter: Run | g: Gen | s: Save | l: Load | a: Add | q: Quit"
+            }
         };
         let help_widget = Paragraph::new(help)
             .style(Style::default().fg(Color::DarkGray))
@@ -491,8 +502,7 @@ impl App {
                 } else {
                     Style::default()
                 };
-                ListItem::new(format!("{} = {} ({:?})", p.name, p.value, p.param_type))
-                    .style(style)
+                ListItem::new(format!("{} = {} ({:?})", p.name, p.value, p.param_type)).style(style)
             })
             .collect();
 
@@ -506,7 +516,11 @@ impl App {
                     .title("Parameters (需修改的参数)")
                     .borders(Borders::ALL),
             )
-            .highlight_style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+            .highlight_style(
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            )
             .highlight_symbol(">");
         f.render_stateful_widget(param_list, left, &mut state);
 
@@ -536,9 +550,12 @@ impl App {
                 } else {
                     Style::default()
                 };
-                let status = if p.use_default { "✓ 默认" } else { "✗ 修改" };
-                ListItem::new(format!("[{}] {} = {}", status, p.name, p.value))
-                    .style(style)
+                let status = if p.use_default {
+                    "✓ 默认"
+                } else {
+                    "✗ 修改"
+                };
+                ListItem::new(format!("[{}] {} = {}", status, p.name, p.value)).style(style)
             })
             .collect();
 
@@ -552,7 +569,11 @@ impl App {
                     .title("Filter - 选择需要修改的参数 [t: 切换]")
                     .borders(Borders::ALL),
             )
-            .highlight_style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+            .highlight_style(
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            )
             .highlight_symbol(">");
         f.render_stateful_widget(param_list, left, &mut state);
 
@@ -597,8 +618,8 @@ impl App {
         })
         .collect();
 
-        let action_list = List::new(action_items)
-            .block(Block::default().title("Actions").borders(Borders::ALL));
+        let action_list =
+            List::new(action_items).block(Block::default().title("Actions").borders(Borders::ALL));
         f.render_widget(action_list, left);
 
         let output = Paragraph::new(self.command_output.as_str())
@@ -636,13 +657,14 @@ impl App {
 
         // 警告信息
         if let Some(ref warning) = self.edit_warning {
-            let warning_widget = Paragraph::new(format!("⚠ {}\n  (仍可保存，但可能导致训练错误)", warning))
-                .style(Style::default().fg(Color::Yellow))
-                .block(
-                    Block::default()
-                        .borders(Borders::ALL)
-                        .style(Style::default().fg(Color::Yellow)),
-                );
+            let warning_widget =
+                Paragraph::new(format!("⚠ {}\n  (仍可保存，但可能导致训练错误)", warning))
+                    .style(Style::default().fg(Color::Yellow))
+                    .block(
+                        Block::default()
+                            .borders(Borders::ALL)
+                            .style(Style::default().fg(Color::Yellow)),
+                    );
             f.render_widget(warning_widget, chunks[1]);
         }
     }

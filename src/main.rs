@@ -22,7 +22,10 @@ fn main() {
     // 根据选择创建配置
     let (config, merge_result) = match launch_mode {
         LaunchMode::OpenConfig(config) => (config, None),
-        LaunchMode::ExtractFromScript { config, merge_result } => (config, merge_result),
+        LaunchMode::ExtractFromScript {
+            config,
+            merge_result,
+        } => (config, merge_result),
     };
 
     // 启动主应用

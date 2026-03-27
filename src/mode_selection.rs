@@ -452,19 +452,17 @@ impl ModeSelector {
             format!("{} (按 'c' 编辑)", self.config_path)
         };
 
-        let paths = Paragraph::new(format!(
-            "脚本: {} | 配置: {}",
-            script_text, config_text
-        ))
-        .block(
+        let paths = Paragraph::new(format!("脚本: {} | 配置: {}", script_text, config_text)).block(
             Block::default()
                 .title("路径设置")
                 .borders(Borders::ALL)
-                .style(Style::default().fg(if self.editing_script || self.editing_config {
-                    Color::Yellow
-                } else {
-                    Color::Gray
-                })),
+                .style(
+                    Style::default().fg(if self.editing_script || self.editing_config {
+                        Color::Yellow
+                    } else {
+                        Color::Gray
+                    }),
+                ),
         );
         f.render_widget(paths, chunks[2]);
 
@@ -474,13 +472,12 @@ impl ModeSelector {
         } else {
             "按 'q' 退出".to_string()
         };
-        let help = Paragraph::new(help_text).style(
-            Style::default().fg(if self.error_msg.is_empty() {
+        let help =
+            Paragraph::new(help_text).style(Style::default().fg(if self.error_msg.is_empty() {
                 Color::DarkGray
             } else {
                 Color::Red
-            }),
-        );
+            }));
         f.render_widget(help, chunks[3]);
     }
 
@@ -503,7 +500,11 @@ impl ModeSelector {
 
         // 标题
         let title = Paragraph::new("是否继承已有配置的设置？")
-            .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+            .style(
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            )
             .block(Block::default().borders(Borders::ALL));
         f.render_widget(title, chunks[0]);
 
@@ -541,17 +542,14 @@ impl ModeSelector {
         f.render_widget(list, chunks[1]);
 
         // 提示
-        let hint = Paragraph::new("继承功能会将旧配置中的参数值复制到新配置中").style(
-            Style::default().fg(Color::DarkGray),
-        );
+        let hint = Paragraph::new("继承功能会将旧配置中的参数值复制到新配置中")
+            .style(Style::default().fg(Color::DarkGray));
         f.render_widget(hint, chunks[2]);
     }
 
     fn ui_merge_result(&self, f: &mut Frame, rect: Rect) {
         // 背景
-        let block = Block::default()
-            .title("配置合并完成")
-            .borders(Borders::ALL);
+        let block = Block::default().title("配置合并完成").borders(Borders::ALL);
         f.render_widget(block, rect);
 
         let chunks = Layout::default()
@@ -567,8 +565,11 @@ impl ModeSelector {
             .split(rect);
 
         // 标题
-        let title = Paragraph::new("配置合并结果")
-            .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD));
+        let title = Paragraph::new("配置合并结果").style(
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        );
         f.render_widget(title, chunks[0]);
 
         if let Some(ref result) = self.pending_merge_result {
@@ -592,12 +593,15 @@ impl ModeSelector {
 
             // 弃用的参数
             if result.deprecated_params.is_empty() {
-                let deprecated = Paragraph::new("✓ 没有弃用的参数")
-                    .style(Style::default().fg(Color::Gray));
+                let deprecated =
+                    Paragraph::new("✓ 没有弃用的参数").style(Style::default().fg(Color::Gray));
                 f.render_widget(deprecated, chunks[3]);
             } else {
-                let deprecated_names: Vec<_> =
-                    result.deprecated_params.iter().map(|p| p.name.as_str()).collect();
+                let deprecated_names: Vec<_> = result
+                    .deprecated_params
+                    .iter()
+                    .map(|p| p.name.as_str())
+                    .collect();
                 let deprecated = Paragraph::new(format!(
                     "⚠ 保留 {} 个旧参数 (在新脚本中不存在)\n  {}",
                     result.deprecated_params.len(),
